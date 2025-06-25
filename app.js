@@ -703,9 +703,7 @@ class UIManager {
                         <button onclick="window.opener.cart.removeItem('${item.id}'); window.close(); window.opener.ui.openCart();" 
                                 style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
                     </div>
-                        <button onclick="window.opener.cart.removeItem('${item.id}'); window.location.reload();" 
-                                style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
-                    </div>
+                        
                 </div>
             `;
         });
