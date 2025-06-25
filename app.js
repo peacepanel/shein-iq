@@ -784,13 +784,14 @@ createCartWindow() {
                     
                     const items = ${JSON.stringify(this.cart.items)};
                     items.forEach((item, index) => {
-                        message += '\\n' + (index + 1) + '. ' + item.name;
-                        message += '\\n   💰 السعر: ' + item.price.toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
-                        message += '\\n   📦 الكمية: ' + item.quantity;
-                        if (item.size) message += '\\n   📏 المقاس: ' + item.size;
-                        message += '\\n   💵 المجموع الفرعي: ' + (item.price * item.quantity).toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
-                        message += '\\n';
-                    });
+    message += '\\n' + (index + 1) + '. ' + item.name;
+    message += '\\n   💰 السعر: ' + item.price.toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
+    message += '\\n   📦 الكمية: ' + item.quantity;
+    if (item.size) message += '\\n   📏 المقاس: ' + item.size;
+    message += '\\n   🖼️ رابط الصورة: ' + item.imageUrl;
+    message += '\\n   💵 المجموع الفرعي: ' + (item.price * item.quantity).toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
+    message += '\\n';
+});
                     
                     message += '\\n📊 ملخص الطلب:\\n';
                     message += '💰 المجموع الفرعي: ${subtotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}\\n';
