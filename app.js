@@ -667,13 +667,23 @@ class UIManager {
     }
     
     openCart() {
-        if (this.cart.getTotalItems() === 0) {
-            this.showToast('🛒 السلة فارغة! أضف بعض المنتجات أولاً', 'warning');
-            return;
-        }
-        
-        this.createCartWindow();
+    if (this.cart.getTotalItems() === 0) {
+        this.showToast('🛒 السلة فارغة! أضف بعض المنتجات أولاً', 'warning');
+        return;
     }
+    
+    // ===== إضافة فحص تسجيل المستخدم =====
+    // التحقق من وجود بيانات المستخدم قبل فتح السلة
+    if (userManager && !userManager.currentUser) {
+        this.showToast('📝 يرجى تسجيل بياناتك أولاً لإكمال الطلب', 'info');
+        setTimeout(() => {
+            userManager.showRegistrationForm();
+        }, 500);
+        return;
+    }
+    
+    this.createCartWindow();
+}
     
 createCartWindow() {
     const subtotal = this.cart.getTotalPrice();
@@ -2723,156 +2733,3 @@ function showNotificationInfo(msg) {
     }
 }
 
-// معالجة نموذج التسجيل المبسط
-function handleUserRegistration(event) {
-    event.preventDefault();
-    
-    const nameInput = document.getElementById('userNameInput');
-    const emailInput = document.getElementById('userEmailInput');
-    
-    const user = {
-        id: 'user_' + Date.now(),
-        name: nameInput.value.trim(),
-        email: emailInput.value.trim(),
-        registeredAt: new Date().toISOString(),
-        deviceId: deviceId
-    };
-    
-    saveUserData(user);
-    currentUser = user;
-    
-    showNotificationSuccess('✅ تم تسجيل المستخدم بنجاح!');
-    document.getElementById('registrationSection').style.display = 'none';
-    
-    trackAction('user_registered', { 
-        name: user.name, 
-        email: user.email,
-        method: 'simple_form'
-    });
-    
-    // إرسال للنظام المتقدم إذا كان متاحاً
-    if (userManager) {
-        userManager.saveUserData({
-            ...user,
-            phone: '', // سيتم طلبه لاحقاً
-            governorate: '', // سيتم طلبه لاحقاً
-            address: ''
-        });
-    }
-}
-
-// تخطي التسجيل
-function skipRegistration() {
-    document.getElementById('registrationSection').style.display = 'none';
-    showNotificationInfo('يمكنك التسجيل لاحقاً من الإعدادات');
-    trackAction('registration_skipped');
-}
-
-// تثبيت التطبيق - PWA
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    document.getElementById('installBanner').classList.add('show');
-});
-
-function installApp() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                showNotificationSuccess('🎉 تم تثبيت التطبيق بنجاح!');
-                trackAction('app_installed');
-            }
-            deferredPrompt = null;
-            document.getElementById('installBanner').classList.remove('show');
-        });
-    }
-}
-
-// تحديث دالة التهيئة الرئيسية
-document.addEventListener('DOMContentLoaded', async function() {
-    console.log(`🚀 ${CORE_CONFIG.APP_NAME} v${CORE_CONFIG.APP_VERSION} - بدء التحميل...`);
-    
-    try {
-        // تهيئة المكونات الأساسية
-        cart = new ShoppingCart();
-        imageManager = new ImageManager();
-        ui = new UIManager(cart, imageManager);
-        eventManager = new EventManager();
-        
-        // ===== إضافة التهيئة المبسطة =====
-        
-        // 1. تحميل أو إنشاء معرف الجهاز
-        deviceId = getOrCreateDeviceId();
-        console.log('📱 معرف الجهاز:', deviceId);
-        
-        // 2. تحميل بيانات المستخدم
-        currentUser = loadUserData();
-        
-        // 3. معالجة حالة المستخدم
-        if (currentUser) {
-            currentUser.lastActive = new Date().toISOString();
-            saveUserData(currentUser);
-            
-            const firstName = currentUser.name.split(' ')[0];
-            setTimeout(() => {
-                showNotificationSuccess(`👋 مرحباً بعودتك ${firstName}`);
-            }, 1000);
-            
-            trackAction('user_returned', {
-                name: firstName,
-                daysSinceLastActive: Math.floor((Date.now() - new Date(currentUser.lastActive).getTime()) / (1000 * 60 * 60 * 24))
-            });
-        } else {
-            // إظهار نموذج التسجيل بعد 3 ثوانِ للمستخدمين الجدد
-            setTimeout(() => {
-                document.getElementById('registrationSection').style.display = 'block';
-                showNotificationInfo('👋 مرحباً بك! سجل للحصول على تجربة أفضل');
-            }, 3000);
-            
-            trackAction('new_visitor', { deviceId: deviceId });
-        }
-        
-        // 4. ربط نموذج التسجيل
-        const registrationForm = document.getElementById('userRegistrationForm');
-        if (registrationForm) {
-            registrationForm.addEventListener('submit', handleUserRegistration);
-        }
-        
-        // ===== نهاية التهيئة المبسطة =====
-        
-        // عرض الواجهة
-        ui.createCategoryNavigation();
-        await ui.renderCategories();
-        
-        // إخفاء صندوق البحث في البداية
-        if (ui.searchBox) {
-            ui.searchBox.style.display = 'none';
-        }
-        
-        // تهيئة النظام المتقدم
-        setTimeout(async () => {
-            if (typeof initializeAdvancedFeatures === 'function') {
-                const result = await initializeAdvancedFeatures();
-                if (result.success) {
-                    console.log('🎉 النظام المتقدم مفعل!');
-                }
-            }
-        }, 1000);
-        
-        console.log(`✅ ${CORE_CONFIG.APP_NAME} v${CORE_CONFIG.APP_VERSION} - جاهز للاستخدام!`);
-        
-        // إضافة دوال للنافذة العامة
-        window.ui = ui;
-        window.cart = cart;
-        window.deviceId = deviceId;
-        window.currentUser = currentUser;
-        
-    } catch (error) {
-        console.error('❌ خطأ في تهيئة التطبيق:', error);
-    }
-});
-
-console.log('📦 تم تحميل النظام مع دوال إدارة المستخدمين - Enhanced User Management Ready!');
