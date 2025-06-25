@@ -692,14 +692,17 @@ class UIManager {
                         <p style="margin: 5px 0 0 0; color: #059669; font-weight: bold;">المجموع: ${itemTotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</p>
                         ${item.size ? `<p style="margin: 2px 0; color: #6b7280;">المقاس: ${item.size}</p>` : ''}
                     </div>
-                    <div style="text-align: center;">
+                       <div style="text-align: center;">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity - 1}); window.location.reload();" 
+                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity - 1}); window.close(); window.opener.ui.openCart();" 
                                     style="width: 30px; height: 30px; border: none; background: #ef4444; color: white; border-radius: 50%; cursor: pointer;">-</button>
                             <span style="font-weight: bold; min-width: 20px; text-align: center;">${item.quantity}</span>
-                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity + 1}); window.location.reload();" 
+                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity + 1}); window.close(); window.opener.ui.openCart();" 
                                     style="width: 30px; height: 30px; border: none; background: #10b981; color: white; border-radius: 50%; cursor: pointer;">+</button>
                         </div>
+                        <button onclick="window.opener.cart.removeItem('${item.id}'); window.close(); window.opener.ui.openCart();" 
+                                style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
+                    </div>
                         <button onclick="window.opener.cart.removeItem('${item.id}'); window.location.reload();" 
                                 style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
                     </div>
