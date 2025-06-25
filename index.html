@@ -171,27 +171,28 @@
 
         /* Category Container */
         .category-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 20px;
+    max-width: 1400px;  /* زيادة العرض الأقصى */
+    margin: 0 auto;
+    min-height: 200px;  /* إضافة حد أدنى للارتفاع */
+}
 
         .category {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            width: 100%;
-            position: relative;
-            aspect-ratio: 0.85;
-            display: flex;
-            flex-direction: column;
-        }
+    background: rgba(255,255,255,0.95);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+    height: 280px;        /* ارتفاع ثابت بدلاً من aspect-ratio */
+    display: flex;
+    flex-direction: column;
+}
 
         .category:hover {
             transform: translateY(-3px) scale(1.02);
