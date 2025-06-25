@@ -675,135 +675,145 @@ class UIManager {
         this.createCartWindow();
     }
     
-    createCartWindow() {
-        const subtotal = this.cart.getTotalPrice();
-        const deliveryFee = this.cart.getDeliveryFee();
-        const total = this.cart.getFinalTotal();
-        
-        let itemsHtml = '';
-        this.cart.items.forEach((item, index) => {
-            const itemTotal = item.price * item.quantity;
-            itemsHtml += `
-                <div class="cart-item" style="display: flex; align-items: center; padding: 15px; border: 2px solid #e5e7eb; margin: 10px 0; border-radius: 15px; background: #f9fafb;">
-                    <img src="${item.imageUrl}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px; margin-left: 15px;">
-                    <div style="flex: 1;">
-                        <h4 style="margin: 0 0 5px 0; color: #1f2937;">${item.name}</h4>
-                        <p style="margin: 0; color: #ef4444; font-weight: bold;">${item.price.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY} × ${item.quantity}</p>
-                        <p style="margin: 5px 0 0 0; color: #059669; font-weight: bold;">المجموع: ${itemTotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</p>
-                        ${item.size ? `<p style="margin: 2px 0; color: #6b7280;">المقاس: ${item.size}</p>` : ''}
-                    </div>
-                       <div style="text-align: center;">
-                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity - 1}); window.close(); window.opener.ui.openCart();" 
-                                    style="width: 30px; height: 30px; border: none; background: #ef4444; color: white; border-radius: 50%; cursor: pointer;">-</button>
-                            <span style="font-weight: bold; min-width: 20px; text-align: center;">${item.quantity}</span>
-                            <button onclick="window.opener.cart.updateQuantity('${item.id}', ${item.quantity + 1}); window.close(); window.opener.ui.openCart();" 
-                                    style="width: 30px; height: 30px; border: none; background: #10b981; color: white; border-radius: 50%; cursor: pointer;">+</button>
-                        </div>
-                        <button onclick="window.opener.cart.removeItem('${item.id}'); window.close(); window.opener.ui.openCart();" 
-                                style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
-                    </div>
-                        
+createCartWindow() {
+    const subtotal = this.cart.getTotalPrice();
+    const deliveryFee = this.cart.getDeliveryFee();
+    const total = this.cart.getFinalTotal();
+    
+    let itemsHtml = '';
+    this.cart.items.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        itemsHtml += `
+            <div class="cart-item" style="display: flex; align-items: center; padding: 15px; border: 2px solid #e5e7eb; margin: 10px 0; border-radius: 15px; background: #f9fafb;">
+                <img src="${item.imageUrl}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 10px; margin-left: 15px;">
+                <div style="flex: 1;">
+                    <h4 style="margin: 0 0 5px 0; color: #1f2937;">${item.name}</h4>
+                    <p style="margin: 0; color: #ef4444; font-weight: bold;">${item.price.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY} × ${item.quantity}</p>
+                    <p style="margin: 5px 0 0 0; color: #059669; font-weight: bold;">المجموع: ${itemTotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</p>
+                    ${item.size ? `<p style="margin: 2px 0; color: #6b7280;">المقاس: ${item.size}</p>` : ''}
                 </div>
-            `;
-        });
+                <div style="text-align: center;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <button onclick="updateCartQuantity('${item.id}', ${item.quantity - 1})" 
+                                style="width: 30px; height: 30px; border: none; background: #ef4444; color: white; border-radius: 50%; cursor: pointer;">-</button>
+                        <span style="font-weight: bold; min-width: 20px; text-align: center;">${item.quantity}</span>
+                        <button onclick="updateCartQuantity('${item.id}', ${item.quantity + 1})" 
+                                style="width: 30px; height: 30px; border: none; background: #10b981; color: white; border-radius: 50%; cursor: pointer;">+</button>
+                    </div>
+                    <button onclick="removeCartItem('${item.id}')" 
+                            style="background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 10px; cursor: pointer;">🗑️ حذف</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    const cartWindow = window.open('', '_blank', 'width=800,height=700,scrollbars=yes');
+    cartWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>🛒 مراجعة السلة - ${CORE_CONFIG.APP_NAME}</title>
+            <style>
+                body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); direction: rtl; margin: 0; min-height: 100vh; }
+                .container { background: white; border-radius: 20px; padding: 25px; max-width: 900px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+                h1 { text-align: center; color: #1f2937; margin-bottom: 30px; font-size: 2rem; }
+                .summary { background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #8B5CF6; }
+                .summary-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; }
+                .total-row { font-weight: bold; font-size: 1.3rem; color: #1f2937; border-top: 2px solid #8B5CF6; padding-top: 10px; margin-top: 15px; }
+                .btn-primary { display: block; width: 100%; text-align: center; padding: 20px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; border-radius: 50px; margin: 25px 0; font-size: 1.2rem; font-weight: 700; border: none; cursor: pointer; }
+                .btn-secondary { background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin: 0 5px; }
+                .delivery-note { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; }
+                .free-delivery-note { background: #d1fae5; border: 2px solid #10b981; color: #047857; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; }
+            </style>
+        </head>
         
-        const cartWindow = window.open('', '_blank', 'width=800,height=700,scrollbars=yes');
-        cartWindow.document.write(`
-            <!DOCTYPE html>
-            <html lang="ar" dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>🛒 مراجعة السلة - ${CORE_CONFIG.APP_NAME}</title>
-                <style>
-                    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); direction: rtl; margin: 0; min-height: 100vh; }
-                    .container { background: white; border-radius: 20px; padding: 25px; max-width: 900px; margin: 0 auto; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-                    h1 { text-align: center; color: #1f2937; margin-bottom: 30px; font-size: 2rem; }
-                    .summary { background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%); padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #8B5CF6; }
-                    .summary-row { display: flex; justify-content: space-between; margin: 10px 0; font-size: 1.1rem; }
-                    .total-row { font-weight: bold; font-size: 1.3rem; color: #1f2937; border-top: 2px solid #8B5CF6; padding-top: 10px; margin-top: 15px; }
-                    .btn-primary { display: block; width: 100%; text-align: center; padding: 20px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; text-decoration: none; border-radius: 50px; margin: 25px 0; font-size: 1.2rem; font-weight: 700; border: none; cursor: pointer; }
-                    .btn-secondary { background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin: 0 5px; }
-                    .delivery-note { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; }
-                    .free-delivery-note { background: #d1fae5; border: 2px solid #10b981; color: #047857; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🛒 مراجعة السلة - ${CORE_CONFIG.APP_NAME}</h1>
-                    
-                    <div style="margin: 20px 0;">
-                        <h3>📦 المنتجات المطلوبة (${this.cart.items.length} منتج)</h3>
-                        ${itemsHtml}
+        <body>
+            <div class="container">
+                <h1>🛒 مراجعة السلة - ${CORE_CONFIG.APP_NAME}</h1>
+                
+                <div style="margin: 20px 0;">
+                    <h3>📦 المنتجات المطلوبة (${this.cart.items.length} منتج)</h3>
+                    ${itemsHtml}
+                </div>
+                
+                <div class="summary">
+                    <h3 style="color: #8B5CF6; margin-bottom: 15px;">📊 ملخص الطلب</h3>
+                    <div class="summary-row">
+                        <span>المجموع الفرعي:</span>
+                        <span>${subtotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
                     </div>
-                    
-                    <div class="summary">
-                        <h3 style="color: #8B5CF6; margin-bottom: 15px;">📊 ملخص الطلب</h3>
-                        <div class="summary-row">
-                            <span>المجموع الفرعي:</span>
-                            <span>${subtotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>رسوم التوصيل:</span>
-                            <span>${deliveryFee === 0 ? 'مجاني 🎉' : deliveryFee.toLocaleString() + ' ' + CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
-                        </div>
-                        ${deliveryFee === 0 
-                            ? '<div class="free-delivery-note">🎉 تم تفعيل التوصيل المجاني!</div>' 
-                            : `<div class="delivery-note">💡 أضف ${(CORE_CONFIG.ECOMMERCE.FREE_DELIVERY_THRESHOLD - subtotal).toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY} للحصول على توصيل مجاني!</div>`
-                        }
-                        <div class="summary-row total-row">
-                            <span>المجموع الكلي:</span>
-                            <span>${total.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
-                        </div>
+                    <div class="summary-row">
+                        <span>رسوم التوصيل:</span>
+                        <span>${deliveryFee === 0 ? 'مجاني 🎉' : deliveryFee.toLocaleString() + ' ' + CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
                     </div>
-                    
-                    <button class="btn-primary" onclick="sendToWhatsApp()">
-                        📱 إرسال الطلب عبر واتساب
-                    </button>
-                    
-                    <div style="text-align: center; margin-top: 20px;">
-                        <button class="btn-secondary" onclick="window.opener.cart.clear(); window.close();">🧹 تفريغ السلة</button>
-                        <button class="btn-secondary" onclick="window.close();">❌ إغلاق</button>
+                    ${deliveryFee === 0 
+                        ? '<div class="free-delivery-note">🎉 تم تفعيل التوصيل المجاني!</div>' 
+                        : `<div class="delivery-note">💡 أضف ${(CORE_CONFIG.ECOMMERCE.FREE_DELIVERY_THRESHOLD - subtotal).toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY} للحصول على توصيل مجاني!</div>`
+                    }
+                    <div class="summary-row total-row">
+                        <span>المجموع الكلي:</span>
+                        <span>${total.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}</span>
                     </div>
                 </div>
                 
-                <script>
-                    function sendToWhatsApp() {
-                        const message = createWhatsAppMessage();
-                        const whatsappUrl = 'https://api.whatsapp.com/send?phone=${CORE_CONFIG.ECOMMERCE.WHATSAPP_NUMBER}&text=' + encodeURIComponent(message);
-                        window.open(whatsappUrl, '_blank');
-                        window.close();
-                    }
+                <button class="btn-primary" onclick="sendToWhatsApp()">
+                    📱 إرسال الطلب عبر واتساب
+                </button>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn-secondary" onclick="window.opener.cart.clear(); window.close();">🧹 تفريغ السلة</button>
+                    <button class="btn-secondary" onclick="window.close();">❌ إغلاق</button>
+                </div>
+            </div>
+            
+            <script>
+                function updateCartQuantity(itemId, newQuantity) {
+                    window.opener.cart.updateQuantity(itemId, newQuantity);
+                    location.reload();
+                }
+                
+                function removeCartItem(itemId) {
+                    window.opener.cart.removeItem(itemId);
+                    location.reload();
+                }
+                
+                function sendToWhatsApp() {
+                    const message = createWhatsAppMessage();
+                    const whatsappUrl = 'https://api.whatsapp.com/send?phone=${CORE_CONFIG.ECOMMERCE.WHATSAPP_NUMBER}&text=' + encodeURIComponent(message);
+                    window.open(whatsappUrl, '_blank');
+                    window.close();
+                }
+                
+                function createWhatsAppMessage() {
+                    let message = '🛍️ طلب جديد من ${CORE_CONFIG.APP_NAME}\\n\\n';
+                    message += '📦 المنتجات المطلوبة:\\n';
                     
-                    function createWhatsAppMessage() {
-                        let message = '🛍️ طلب جديد من ${CORE_CONFIG.APP_NAME}\\n\\n';
-                        message += '📦 المنتجات المطلوبة:\\n';
-                        
-                        const items = ${JSON.stringify(this.cart.items)};
-                        items.forEach((item, index) => {
-                            message += '\\n' + (index + 1) + '. ' + item.name;
-                            message += '\\n   💰 السعر: ' + item.price.toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
-                            message += '\\n   📦 الكمية: ' + item.quantity;
-                            if (item.size) message += '\\n   📏 المقاس: ' + item.size;
-                            message += '\\n   💵 المجموع الفرعي: ' + (item.price * item.quantity).toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
-                            message += '\\n';
-                        });
-                        
-                        message += '\\n📊 ملخص الطلب:\\n';
-                        message += '💰 المجموع الفرعي: ${subtotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}\\n';
-                        message += '🚚 رسوم التوصيل: ${deliveryFee === 0 ? 'مجاني 🎉' : deliveryFee.toLocaleString() + ' ' + CORE_CONFIG.ECOMMERCE.CURRENCY}\\n';
-                        message += '💵 المجموع الكلي: ${total.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}\\n\\n';
-                        message += '📞 للتواصل: ${CORE_CONFIG.ECOMMERCE.PHONE_NUMBER}\\n';
-                        message += '🌐 الموقع: ${CORE_CONFIG.APP_URL}';
-                        
-                        return message;
-                    }
-                </script>
-            </body>
-            </html>
-        `);
-    }
+                    const items = ${JSON.stringify(this.cart.items)};
+                    items.forEach((item, index) => {
+                        message += '\\n' + (index + 1) + '. ' + item.name;
+                        message += '\\n   💰 السعر: ' + item.price.toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
+                        message += '\\n   📦 الكمية: ' + item.quantity;
+                        if (item.size) message += '\\n   📏 المقاس: ' + item.size;
+                        message += '\\n   💵 المجموع الفرعي: ' + (item.price * item.quantity).toLocaleString() + ' ${CORE_CONFIG.ECOMMERCE.CURRENCY}';
+                        message += '\\n';
+                    });
+                    
+                    message += '\\n📊 ملخص الطلب:\\n';
+                    message += '💰 المجموع الفرعي: ${subtotal.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}\\n';
+                    message += '🚚 رسوم التوصيل: ${deliveryFee === 0 ? 'مجاني 🎉' : deliveryFee.toLocaleString() + ' ' + CORE_CONFIG.ECOMMERCE.CURRENCY}\\n';
+                    message += '💵 المجموع الكلي: ${total.toLocaleString()} ${CORE_CONFIG.ECOMMERCE.CURRENCY}\\n\\n';
+                    message += '📞 للتواصل: ${CORE_CONFIG.ECOMMERCE.PHONE_NUMBER}\\n';
+                    message += '🌐 الموقع: ${CORE_CONFIG.APP_URL}';
+                    
+                    return message;
+                }
+            </script>
+        </body>
+        </html>
+    `);
+}
     
     enlargeImage(src) {
         if (!this.overlay || !src) return;
